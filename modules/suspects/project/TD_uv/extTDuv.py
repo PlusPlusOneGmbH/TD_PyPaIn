@@ -11,6 +11,8 @@ from functools import cached_property
 import os
 import zipfile
 
+from compInstaller import installOpAt
+
 from types import ModuleType
 from typing import List
 from pathlib import Path
@@ -265,3 +267,15 @@ class extTDuv:
 			if not self.InstallPackage(_pipPackageName, additional_settings=additionalSettings):
 				raise ModuleNotFoundError
 		return importlib.import_module(moduleName)
+	
+
+	def InstallToProject(self):
+		self.ownerComp.op("installCliButton_Execute").par.active.val = True
+		newSys = installOpAt( self.ownerComp.op("__sys"), "/local/modules")
+		newSys.name = "sys"
+
+		newUv = installOpAt( self.ownerComp, "/utils" )
+		newUv.par.opshortcut.val = "UV"
+
+		self.ownerComp.destroy()
+		
