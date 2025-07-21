@@ -178,8 +178,21 @@ class extTDuv:
 			**os.environ,
 			"PATH" : ";".join([ self.uvFolder ] + os.environ["PATH"].split(";"))
 		},
-		 shell=True )
-
+		shell=False,
+		 start_new_session=True )
+	
+	def OpenCli(self, stallMain = False):
+		shellProcess = subprocess.Popen( ["cmd"], env= {
+			**os.environ,
+			"PATH" : ";".join([ self.uvFolder ] + os.environ["PATH"].split(";"))
+		},
+			cwd = os.path.abspath("."),
+			creationflags=subprocess.CREATE_NEW_CONSOLE
+		)
+		if stallMain: 
+			return shellProcess.wait()
+		return shellProcess
+	
 	def SetupUv(self):
 		self.Log("Setting up UV.")
 		downloadUvZip = self.ownerComp.op("uvDependency").GetRemoteFilepath()
@@ -208,12 +221,9 @@ class extTDuv:
 	@ProjectRequired
 	@VenvRequired
 	def InstallPackage(self, packagePipName:str, additional_settings:List[str] = []):
-		sourceIndex = ""
-		for _index, element in enumerate( additional_settings ):
-			if element in ["--index", "-i"]: 
-				sourceIndex = additional_settings[ _index +1 ]
-				break
-		self.ownerComp.op("dependecyTableRepo").Repo.row( packagePipName ) or self.ownerComp.op("dependecyTableRepo").Repo.appendRow([packagePipName, sourceIndex])
+		_delete = self.ownerComp.op("dependecyTableRepo").Repo.row( packagePipName ) and self.ownerComp.op("dependencyTableRepo").Repo.delteRow( packagePipName ) 
+		self.ownerComp.op("dependecyTableRepo").Repo.appendRow([packagePipName] + additional_settings)
+		
 		self.Log("Installing Package", packagePipName)
 		return self.runUvCommand(["add", packagePipName] + additional_settings) == 0
 

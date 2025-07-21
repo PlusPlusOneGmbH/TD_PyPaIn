@@ -7,4 +7,5 @@ requires-python = ">=3.11.1"
 td-version = "2023.12000"
 dependencies = [
     "pip-install-test>=0.5",
+    "qrcode>=8.2",
 ]
